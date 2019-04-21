@@ -37,6 +37,10 @@ def name_dword_array(ea, name, nitems):
 	idaapi.create_data(ea, idaapi.dword_flag(), 4 * nitems, idaapi.BADNODE)
 	idaapi.set_offset(ea, 0, 0)
 
+def name_code(ea, name, size):
+	idaapi.set_name(ea, name)
+	idaapi.create_data(ea, idaapi.code_flag(), size, idaapi.BADNODE)
+
 def load_file(li, neflags, format):
 	if format != "NeoGeo 68k loader":
 		return 0
@@ -59,10 +63,9 @@ def load_file(li, neflags, format):
 	file_data = li.read(size)
 	idaapi.mem2base(file_data, 0, 0x100000)
 	
+	# http://ajworld.net/neogeodev/beginner/
 	name_long(0x000000, "InitSP")
 	name_long(0x000004, "InitPC")
-
-	# http://ajworld.net/neogeodev/beginner/
 	name_long(0x000008, "BusError")
 	name_long(0x00000C, "AddressError")
 	name_long(0x000010, "IllegalInstruction")
@@ -88,6 +91,7 @@ def load_file(li, neflags, format):
 	name_array(0x0000C0, "Reserved2", 0x40)
 
 	# Neo-Geo header
+	# https://wiki.neogeodev.org/index.php?title=68k_program_header
 	idc.create_strlit(0x000100, 0x000107)
 	idaapi.set_name(0x000100, "Magic")
 	name_byte(0x000107, "SysVersion")
@@ -100,12 +104,15 @@ def load_file(li, neflags, format):
 	name_long(0x000116, "DipsJP")
 	name_long(0x00011A, "DipsUS")
 	name_long(0x00011E, "DipsEU")
-	name_array(0x000122, "Routine_USER", 6)
-	name_array(0x000128, "Routine_PLAYER_START", 6)
-	name_array(0x00012E, "Routine_DEMO_END", 6)
-	name_array(0x000134, "Routine_COIN_SOUND", 6)
-	name_array(0x00013A, "Unknown", 0x48)
+	name_code(0x000122, "Routine_USER", 6)
+	name_code(0x000128, "Routine_PLAYER_START", 6)
+	name_code(0x00012E, "Routine_DEMO_END", 6)
+	name_code(0x000134, "Routine_COIN_SOUND", 6)
+	name_array(0x00013A, "Unknown0", 0x48)
 	name_long(0x000182, "SecurityCodePtr")
+	name_long(0x000186, "Unknown1")
+	name_long(0x00018A, "Unknown2")
+	name_long(0x00018E, "DipsES")		# Spanish
 
 	idaapi.del_items(0x3C0000)
 	idaapi.create_byte(0x3C0000, 1)
