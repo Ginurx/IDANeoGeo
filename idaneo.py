@@ -12,14 +12,29 @@ def accept_file(li, n):
 
 	return "NeoGeo 68k loader"
 
+def name_byte(ea, name):
+	idaapi.set_name(ea, name)
+	idaapi.create_byte(ea, 1)
+	idaapi.set_offset(ea, 0, 0)
+
+def name_word(ea, name):
+	idaapi.set_name(ea, name)
+	idaapi.create_word(ea, 2)
+	idaapi.set_offset(ea, 0, 0)
+
 def name_long(ea, name):
 	idaapi.set_name(ea, name)
-	idaapi.doDwrd(ea, 4)
+	idaapi.create_dword(ea, 4)
 	idaapi.set_offset(ea, 0, 0)
 
 def name_array(ea, name, nitems):
 	idaapi.set_name(ea, name)
 	idc.make_array(ea, nitems)
+	idaapi.set_offset(ea, 0, 0)
+
+def name_dword_array(ea, name, nitems):
+	idaapi.set_name(ea, name)
+	idaapi.create_data(ea, idaapi.dword_flag(), 4 * nitems, idaapi.BADNODE)
 	idaapi.set_offset(ea, 0, 0)
 
 def load_file(li, neflags, format):
@@ -69,14 +84,31 @@ def load_file(li, neflags, format):
 	name_long(0x000074, "InterruptLv5")
 	name_long(0x000078, "InterruptLv6")
 	name_long(0x00007C, "InterruptLv7")
-	name_long(0x000080, "Trap1")
-	name_long(0x000084, "Trap2")
-	name_long(0x000088, "Trap3")
-	name_long(0x000088C, "Trap4")
+	name_dword_array(0x000080, "Traps", 0x10)
 	name_array(0x0000C0, "Reserved2", 0x40)
 
-	idaapi.do_unknown(0x3C0000, 1)
-	idaapi.doByte(0x3C0000, 1)
+	# Neo-Geo header
+	idc.create_strlit(0x000100, 0x000107)
+	idaapi.set_name(0x000100, "Magic")
+	name_byte(0x000107, "SysVersion")
+	name_word(0x000108, "GameID")
+	name_long(0x00010A, "ProgramSize")
+	name_long(0x00010E, "BakupRamPtr")
+	name_word(0x000112, "GameSaveSize")
+	name_byte(0x000114, "EyecatchFlag")
+	name_byte(0x000115, "EyecatchSpriteBank")
+	name_long(0x000116, "DipsJP")
+	name_long(0x00011A, "DipsUS")
+	name_long(0x00011E, "DipsEU")
+	name_array(0x000122, "Routine_USER", 6)
+	name_array(0x000128, "Routine_PLAYER_START", 6)
+	name_array(0x00012E, "Routine_DEMO_END", 6)
+	name_array(0x000134, "Routine_COIN_SOUND", 6)
+	name_array(0x00013A, "Unknown", 0x48)
+	name_long(0x000182, "SecurityCodePtr")
+
+	idaapi.del_items(0x3C0000)
+	idaapi.create_byte(0x3C0000, 1)
 	idaapi.set_name(0x3C0000, "REG_VRAMADDR")
 	#idaapi.set_cmt(0x3C0000, "Pouet.", 1)
 
