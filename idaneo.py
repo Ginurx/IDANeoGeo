@@ -41,6 +41,31 @@ def name_code(ea, name, size):
 	idaapi.set_name(ea, name)
 	idaapi.create_data(ea, idaapi.code_flag(), size, idaapi.BADNODE)
 
+def map_io_registers():
+	# https://wiki.neogeodev.org/index.php?title=Memory_mapped_registers
+	name_byte(0x300000, "REG_P1CNT")
+	name_byte(0x300001, "REG_DIPSW")
+	name_byte(0x300081, "REG_SYSTYPE")
+	name_byte(0x320000, "REG_SOUND")
+	name_byte(0x320000, "REG_STATUS_A")
+	name_byte(0x340000, "REG_P2CNT")
+	name_byte(0x380000, "REG_STATUS_B")
+	name_byte(0x380001, "REG_POUTPUT")
+	name_byte(0x380011, "REG_CRDBANK")
+	name_byte(0x380021, "REG_SLOT")
+	name_byte(0x380031, "REG_LEDLATCHES")
+	name_byte(0x380041, "REG_LEDDATA")
+	name_byte(0x380051, "REG_RTCCTRL")
+	name_byte(0x380061, "REG_RESETCC1")
+	name_byte(0x380063, "REG_RESETCC2")
+	name_byte(0x380065, "REG_RESETCL1")
+	name_byte(0x380067, "REG_RESETCL2")
+	name_byte(0x3800E1, "REG_SETCC1")
+	name_byte(0x3800E3, "REG_SETCC2")
+	name_byte(0x3800E5, "REG_SETCL1")
+	name_byte(0x3800E7, "REG_SETCL2")
+
+
 def load_file(li, neflags, format):
 	if format != "NeoGeo 68k loader":
 		return 0
@@ -56,6 +81,8 @@ def load_file(li, neflags, format):
 	idaapi.add_segm(0, 0x800000, 0xBFFFFF, "MEMCARD", "DATA")
 	idaapi.add_segm(0, 0xC00000, 0xC1FFFF, "SYSROM", "DATA")
 	idaapi.add_segm(0, 0xD00000, 0xD0FFFF, "BRAM", "DATA")
+
+	map_io_registers()
 
 	li.seek(0, 2)
 	size = li.tell()
